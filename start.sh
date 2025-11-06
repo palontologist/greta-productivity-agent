@@ -14,9 +14,10 @@ if ! command -v node &> /dev/null; then
 fi
 
 # Check Node.js version
-NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-if [ "$NODE_VERSION" -lt 18 ]; then
-    echo "⚠️  Node.js version is too old. You have v$(node -v), but need v18+"
+NODE_VERSION=$(node -v | sed 's/v//' | cut -d'.' -f1)
+# Only check if it's a number
+if [[ "$NODE_VERSION" =~ ^[0-9]+$ ]] && [ "$NODE_VERSION" -lt 18 ]; then
+    echo "⚠️  Node.js version is too old. You have $(node -v), but need v18+"
     echo "   Please upgrade Node.js: https://nodejs.org/"
     exit 1
 fi

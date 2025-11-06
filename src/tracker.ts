@@ -2,6 +2,8 @@ import activeWin from 'active-win';
 import { ActivityDatabase, ActivityLog } from './database';
 
 export class ActivityTracker {
+  private static readonly LOG_TITLE_MAX_LENGTH = 50;
+  
   private db: ActivityDatabase;
   private trackingInterval: NodeJS.Timeout | null = null;
   private lastActivity: { appName: string; windowTitle: string; timestamp: number } | null = null;
@@ -71,7 +73,7 @@ export class ActivityTracker {
         timestamp: currentTime
       };
 
-      console.log(`Tracked: ${appName} - ${windowTitle.substring(0, 50)}...`);
+      console.log(`Tracked: ${appName} - ${windowTitle.substring(0, ActivityTracker.LOG_TITLE_MAX_LENGTH)}...`);
     } catch (error) {
       console.error('Error tracking activity:', error);
     }

@@ -1,4 +1,5 @@
-const { ipcRenderer } = require('electron');
+// Access the secure API exposed through preload script
+const gretaAPI = window.gretaAPI;
 
 // Format milliseconds to readable time
 function formatTime(ms) {
@@ -38,7 +39,7 @@ function getCategoryClass(category) {
 // Load and display recent activities
 async function loadRecentActivities() {
   try {
-    const activities = await ipcRenderer.invoke('get-recent-activities', 30);
+    const activities = await gretaAPI.getRecentActivities(30);
     const activityList = document.getElementById('activity-list');
 
     if (activities.length === 0) {
@@ -74,7 +75,7 @@ async function loadActivitySummary() {
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const endOfDay = startOfDay + 24 * 60 * 60 * 1000;
 
-    const summary = await ipcRenderer.invoke('get-activity-summary', startOfDay, endOfDay);
+    const summary = await gretaAPI.getActivitySummary(startOfDay, endOfDay);
     const summaryBody = document.getElementById('summary-body');
 
     if (summary.length === 0) {
