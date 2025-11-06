@@ -1,0 +1,29 @@
+{
+  "name": "greta-productivity-agent",
+  "version": "0.1.0",
+  "description": "Mission-aligned productivity tracking agent",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "npm run build && electron .",
+    "start": "electron .",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "productivity",
+    "tracking",
+    "electron"
+  ],
+  "author": "Greta Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.10.0",
+    "electron": "^28.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "active-win": "^8.0.0",
+    "better-sqlite3": "^9.2.2"
+  }
+}

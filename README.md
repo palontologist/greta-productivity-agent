@@ -2,7 +2,25 @@
 
 > **Mission-aligned productivity tracking that helps you work on what truly matters.**
 
+**✨ MVP is now live!** A fully functional desktop app is ready to use. [Jump to Getting Started →](#-getting-started)
+
+---
+
 Greta Productivity Agent is an Electron-based desktop companion that bridges the gap between passive activity monitoring and intentional, mission-driven work. Unlike traditional time trackers that just count minutes, Greta helps you understand *how well* your daily activities align with your personal mission and long-term goals.
+
+## 🎉 MVP Features (Available Now!)
+
+The current MVP includes:
+
+- ✅ **Real-time Activity Tracking** - Automatically monitors your active window every 5 seconds
+- ✅ **Smart Categorization** - Intelligently classifies activities (Deep Work, Communication, Research, Distraction)
+- ✅ **Beautiful Dashboard** - Modern UI showing statistics, activity timeline, and time breakdown
+- ✅ **Local SQLite Database** - All your data stored securely on your machine
+- ✅ **Privacy-First** - Zero external calls, complete data privacy
+- ✅ **Cross-Platform** - Works on macOS, Windows, and Linux
+- ✅ **Production-Ready** - Secure architecture with Electron best practices
+
+📖 See [MVP-GUIDE.md](MVP-GUIDE.md) for detailed usage instructions and [VISUAL-GUIDE.md](VISUAL-GUIDE.md) for UI details.
 
 ## 🎯 The Vision
 
@@ -177,25 +195,42 @@ Beautiful visualizations make patterns obvious and sharing your progress effortl
 ### Prerequisites
 
 - Node.js 18+ and npm/yarn
-- Greta account (sign up at [greta-v2.vercel.app](https://greta-v2.vercel.app))
 
-### Installation
+### Quick Start
+
+The fastest way to get started:
 
 ```bash
 # Clone the repository
 git clone https://github.com/palontologist/greta-productivity-agent.git
 cd greta-productivity-agent
 
+# Run the quick start script
+./start.sh
+```
+
+### Manual Installation
+
+```bash
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your Greta API key
+# Build the TypeScript code
+npm run build
 
-# Start development mode
+# Start the application
 npm run dev
 ```
+
+The app will open and immediately start tracking your activities!
+
+### What Happens Next
+
+1. The Electron window opens with your dashboard
+2. Background tracking starts automatically (every 5 seconds)
+3. Your activities are logged to a local SQLite database
+4. The dashboard updates every 10 seconds with new data
+5. All data stays on your machine - completely private
 
 ### Building
 
@@ -221,11 +256,13 @@ Check out [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📝 Roadmap
 
-**Phase 1: Foundation** (Current)
-- [x] Basic window tracking for macOS
-- [ ] SQLite storage layer
-- [ ] Electron app shell
-- [ ] API client with offline queue
+**Phase 1: Foundation** ✅ **COMPLETE**
+- [x] Basic window tracking for macOS/Windows/Linux
+- [x] SQLite storage layer
+- [x] Electron app shell
+- [x] Dashboard with real-time metrics
+- [x] Activity categorization
+- [x] Security best practices (context isolation)
 
 **Phase 2: Intelligence**
 - [ ] Automatic activity categorization
