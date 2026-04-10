@@ -1,0 +1,6 @@
+# Local dev secrets — DO NOT commit this file
+# Copy to .dev.vars and fill in your real keys before running `npx wrangler dev`
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+ELEVENLABS_API_KEY=your-elevenlabs-key-here
+ELEVENLABS_VOICE_ID=your-voice-id-here
+ASSEMBLYAI_API_KEY=your-assemblyai-key-here

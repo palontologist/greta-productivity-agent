@@ -9,3 +9,8 @@ npm-debug.log*
 *.db-journal
 *.db-shm
 *.db-wal
+
+# Cloudflare Worker
+worker/node_modules/
+worker/.dev.vars
+worker/dist/
