@@ -50,7 +50,7 @@ export default {
     } catch (error) {
       console.error(`[${url.pathname}] Unhandled error:`, error);
       return new Response(
-        JSON.stringify({ error: String(error) }),
+        JSON.stringify({ error: "Internal server error" }),
         { status: 500, headers: { "content-type": "application/json", ...CORS_HEADERS } }
       );
     }

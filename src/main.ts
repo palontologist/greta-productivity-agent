@@ -503,7 +503,7 @@ async function callClaude(
 // ---------------------------------------------------------------------------
 
 function schedulePointAnimations(text: string): void {
-  const pointTagPattern = /\[POINT:(\d+),(\d+)(?::([^\]:]*))?(?::[^\]]+)?\]/g;
+  const pointTagPattern = /\[POINT:(\d+),(\d+)(?::([^\]:]*))?\]/g;
   let match: RegExpExecArray | null;
   let delayMs = 500; // small initial delay so the response text appears first
 
