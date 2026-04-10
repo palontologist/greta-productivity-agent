@@ -1,117 +1,128 @@
-// Access the secure API exposed through preload script
-const gretaAPI = window.gretaAPI;
+// Panel renderer — controls the tray panel UI.
 
-// Format milliseconds to readable time
+const api = window.gretaAPI;
+
+// Detect platform for shortcut display
+const isMac = navigator.platform.toUpperCase().includes('MAC');
+document.getElementById('shortcut-display').textContent =
+  isMac ? '⌘⇧Space' : 'Ctrl+Shift+Space';
+
+// --------------------------------------------------------------------------
+// PTT button
+// --------------------------------------------------------------------------
+
+function handlePTT() {
+  api.triggerPTT();
+}
+
+// --------------------------------------------------------------------------
+// Settings helpers
+// --------------------------------------------------------------------------
+
+function saveWorkerUrl(url) {
+  api.setWorkerUrl(url.trim() || 'http://localhost:8787');
+}
+
+function saveModel(model) {
+  api.setModel(model);
+}
+
+function saveVoice(enabled) {
+  api.setVoiceEnabled(enabled);
+}
+
+function clearHistory() {
+  if (confirm('Clear the entire conversation history with Greta?')) {
+    api.clearHistory();
+    document.getElementById('turn-count').textContent = '0 turns';
+  }
+}
+
+// --------------------------------------------------------------------------
+// State update handler — main → panel
+// --------------------------------------------------------------------------
+
+const STATE_CONFIG = {
+  idle:       { icon: '💤', text: 'Idle — press the button or shortcut to talk', btnText: '🎙 Talk to Greta',  btnClass: '' },
+  recording:  { icon: '🔴', text: 'Recording… press again or shortcut to stop', btnText: '⏹ Stop Recording', btnClass: 'recording' },
+  processing: { icon: '⏳', text: 'Transcribing and thinking…',                  btnText: '⏳ Processing…',   btnClass: 'processing' },
+  responding: { icon: '✨', text: 'Greta is responding…',                        btnText: '✨ Responding…',   btnClass: 'responding' },
+};
+
+function applyState(state) {
+  const cfg = STATE_CONFIG[state.companionState] || STATE_CONFIG.idle;
+
+  // Status bar
+  document.getElementById('status-bar').querySelector('.status-icon').textContent = cfg.icon;
+  document.getElementById('status-text').textContent = cfg.text;
+
+  // Logo dot
+  const dot = document.getElementById('logo-dot');
+  dot.className = 'logo-dot ' + (state.companionState !== 'idle' ? state.companionState : '');
+
+  // PTT button
+  const btn = document.getElementById('ptt-btn');
+  btn.textContent = cfg.btnText;
+  btn.className = 'ptt-btn no-drag ' + cfg.btnClass;
+  btn.disabled = state.companionState === 'processing' || state.companionState === 'responding';
+
+  // Turn counter
+  const turns = state.conversationTurns || 0;
+  document.getElementById('turn-count').textContent = `${turns} turn${turns !== 1 ? 's' : ''}`;
+
+  // Settings — sync values without triggering change events
+  const workerInput = document.getElementById('worker-url');
+  if (document.activeElement !== workerInput) {
+    workerInput.value = state.workerUrl || 'http://localhost:8787';
+  }
+
+  const modelSelect = document.getElementById('model-select');
+  if (state.selectedModel) modelSelect.value = state.selectedModel;
+
+  document.getElementById('voice-toggle').checked = state.voiceEnabled !== false;
+}
+
+api.onStateUpdate(applyState);
+
+// --------------------------------------------------------------------------
+// Today's activity stats
+// --------------------------------------------------------------------------
+
 function formatTime(ms) {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
+  const minutes = Math.floor(ms / 60000);
   const hours = Math.floor(minutes / 60);
-
-  if (hours > 0) {
-    return `${hours}h ${minutes % 60}m`;
-  } else if (minutes > 0) {
-    return `${minutes}m`;
-  } else {
-    return `${seconds}s`;
-  }
+  return hours > 0 ? `${hours}h${minutes % 60}m` : `${minutes}m`;
 }
 
-// Format timestamp to readable time
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  return date.toLocaleTimeString();
-}
-
-// Get category class for badge
-function getCategoryClass(category) {
-  if (category.includes('Deep Work')) {
-    return 'deep-work';
-  } else if (category.includes('Communication')) {
-    return 'communication';
-  } else if (category.includes('Research')) {
-    return 'research';
-  } else if (category.includes('Distraction')) {
-    return 'distraction';
-  }
-  return '';
-}
-
-// Load and display recent activities
-async function loadRecentActivities() {
+async function loadTodayStats() {
   try {
-    const activities = await gretaAPI.getRecentActivities(30);
-    const activityList = document.getElementById('activity-list');
-
-    if (activities.length === 0) {
-      activityList.innerHTML = '<div class="loading">No activities tracked yet. The agent is running...</div>';
-      return;
-    }
-
-    activityList.innerHTML = activities.map(activity => {
-      const categoryClass = getCategoryClass(activity.category || '');
-      return `
-        <div class="activity-item">
-          <div class="time">${formatTimestamp(activity.timestamp)}</div>
-          <div class="app">${activity.appName}</div>
-          <div class="title">${activity.windowTitle}</div>
-          <span class="category-badge ${categoryClass}">${activity.category || 'Uncategorized'}</span>
-        </div>
-      `;
-    }).join('');
-
-    // Update total activities stat
-    document.getElementById('total-activities').textContent = activities.length;
-  } catch (error) {
-    console.error('Error loading activities:', error);
-    document.getElementById('activity-list').innerHTML = '<div class="loading">Error loading activities</div>';
-  }
-}
-
-// Load and display activity summary
-async function loadActivitySummary() {
-  try {
-    // Get today's start and end timestamps
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const endOfDay = startOfDay + 24 * 60 * 60 * 1000;
+    const summary = await api.getActivitySummary(startOfDay, Date.now());
 
-    const summary = await gretaAPI.getActivitySummary(startOfDay, endOfDay);
-    const summaryBody = document.getElementById('summary-body');
+    document.getElementById('stat-activities').textContent =
+      summary.reduce((sum, item) => sum + item.count, 0);
+    document.getElementById('stat-apps').textContent = summary.length;
 
-    if (summary.length === 0) {
-      summaryBody.innerHTML = '<tr><td colspan="3" class="loading">No data for today yet</td></tr>';
-      return;
-    }
-
-    summaryBody.innerHTML = summary.map(item => `
-      <tr>
-        <td><strong>${item.appName}</strong></td>
-        <td>${formatTime(item.totalTime)}</td>
-        <td>${item.count}</td>
-      </tr>
-    `).join('');
-
-    // Update stats
-    document.getElementById('tracked-apps').textContent = summary.length;
-    
-    const totalTime = summary.reduce((sum, item) => sum + item.totalTime, 0);
-    document.getElementById('active-time').textContent = formatTime(totalTime);
-  } catch (error) {
-    console.error('Error loading summary:', error);
-    document.getElementById('summary-body').innerHTML = '<tr><td colspan="3" class="loading">Error loading summary</td></tr>';
+    const totalMs = summary.reduce((sum, item) => sum + (item.totalTime || 0), 0);
+    document.getElementById('stat-time').textContent = formatTime(totalMs);
+  } catch (err) {
+    console.error('Failed to load today stats:', err);
   }
 }
 
-// Refresh all data
-async function refreshData() {
-  await Promise.all([
-    loadRecentActivities(),
-    loadActivitySummary()
-  ]);
+// --------------------------------------------------------------------------
+// Initialisation
+// --------------------------------------------------------------------------
+
+async function init() {
+  // Fetch current state immediately
+  const state = await api.getState();
+  applyState(state);
+  loadTodayStats();
 }
 
-// Initial load
-refreshData();
+// Refresh stats every 30 seconds
+setInterval(loadTodayStats, 30000);
 
-// Auto-refresh every 10 seconds
-setInterval(refreshData, 10000);
+init();

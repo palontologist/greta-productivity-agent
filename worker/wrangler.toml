@@ -1,0 +1,12 @@
+name = "greta-proxy-worker"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# Worker vars (non-secret). Set ELEVENLABS_VOICE_ID here.
+[vars]
+ELEVENLABS_VOICE_ID = "your-voice-id-here"
+
+# Secrets (set via `npx wrangler secret put <KEY_NAME>`):
+#   ANTHROPIC_API_KEY
+#   ELEVENLABS_API_KEY
+#   ASSEMBLYAI_API_KEY
